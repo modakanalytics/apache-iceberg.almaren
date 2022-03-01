@@ -30,7 +30,7 @@ private[almaren] case class TargetIceberg(table:String, options:Map[String,Strin
       saveMode match {
         case Append => write.append()
         case Overwrite => write.createOrReplace()
-        case ErrorIfExists => checkIfTableExists(df,table,Right(write))
+        case ErrorIfExists => checkIfTableExists(df,table,write)
         case Ignore => write.createOrReplace()
       }
     } 
@@ -39,22 +39,18 @@ private[almaren] case class TargetIceberg(table:String, options:Map[String,Strin
       saveMode match {
         case Append => write.append()
         case Overwrite => withPartition.createOrReplace()
-        case ErrorIfExists => checkIfTableExists(df,table,Left(withPartition))
+        case ErrorIfExists => checkIfTableExists(df,table,withPartition)
         case Ignore => withPartition.createOrReplace()
       }
     }
     df
   }
 
-  private def checkIfTableExists[T](df:DataFrame,tableName:String,writer:Either[CreateTableWriter[T],DataFrameWriterV2[T]]): Unit = 
+  private def checkIfTableExists[M,T <: CreateTableWriter[M]](df:DataFrame,tableName:String,writer:CreateTableWriter[M]): Unit = 
      if(df.sparkSession.catalog.tableExists(tableName = table))
           throw new Exception(s"Table $table already exists")
      else 
-        writer match {
-          case Left(l) => l.create()
-          case Right(r) => r.create()
-        }
-
+       writer.create()
 }
 
 private[almaren] trait IcebergConnector extends Core {
