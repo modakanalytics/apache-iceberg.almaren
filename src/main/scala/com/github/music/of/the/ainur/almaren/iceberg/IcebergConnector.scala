@@ -1,6 +1,7 @@
 package com.github.music.of.the.ainur.almaren.iceberg
 
 import org.apache.spark.sql.{DataFrame,SaveMode}
+import org.apache.spark.sql.SaveMode.{Append,Overwrite,ErrorIfExists,Ignore}
 import com.github.music.of.the.ainur.almaren.Tree
 import com.github.music.of.the.ainur.almaren.builder.Core
 import com.github.music.of.the.ainur.almaren.state.core.{Target,Source}
@@ -16,12 +17,18 @@ private[almaren] case class SourceIceberg(table:String, options:Map[String,Strin
 
 private[almaren] case class TargetIceberg(table:String, options:Map[String,String],saveMode:SaveMode) extends Target {
   def target(df: DataFrame): DataFrame = {
-    logger.info(s"table:{$table}, options:{$options}")
-    df.write.format("iceberg")
-      .options(options)
-      .mode(saveMode)
-      .save(table)
-    df
+    logger.info(s"table:{$table}, options:{$options}, saveMode:{$saveMode}")
+    val write = df
+    .writeTo(table)
+    .options(options)
+
+    saveMode match {
+      case Append => write.append()
+      case Overwrite => write.overwritePartitions()
+      case ErrorIfExists => throw new Exception("""Mode "ErrorIfExists"" not supported""")
+      case Ignore => write.createOrReplace()
+    }
+        df
   }
 }
 
