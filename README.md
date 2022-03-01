@@ -5,11 +5,11 @@
 Apache-Iceberg Connector allow you to execute any SQL statement using Apache Spark.
 
 ```
-libraryDependencies += "com.github.music-of-the-ainur" %% "iceberg-almaren" % "0.0.1-2.4"
+libraryDependencies += "com.github.music-of-the-ainur" %% "iceberg-almaren" % "0.0.1-3.1"
 ```
 
 ```
-spark-shell --master "local[*]" --packages "com.github.music-of-the-ainur:almaren-framework_2.11:0.9.0-2.4,com.github.music-of-the-ainur:iceberg-almaren_2.11:0.0.1-2.4"
+spark-shell --master "local[*]" --packages "com.github.music-of-the-ainur:almaren-framework_2.12:0.9.2-3.1,com.github.music-of-the-ainur:iceberg-almaren_2.12:0.0.1-2.4"
 ```
 ## Iceberg Batch
 
